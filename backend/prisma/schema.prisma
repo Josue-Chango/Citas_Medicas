@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EstadoCita {
+  pendiente
+  confirmada
+  cancelada
+  completada
+}
+
+model User {
+  id          String        @id
+  nombre      String
+  email       String        @unique
+  password    String
+  tieneSeguro Boolean
+  penalizado  Boolean
+  citas       Appointment[]
+}
+
+model Doctor {
+  id          String        @id
+  nombre      String
+  especialidad String
+  citas       Appointment[]
+}
+
+model Appointment {
+  id                String      @id
+  pacienteId        String
+  medicoId          String
+  especialidad      String
+  fecha             String
+  hora              String
+  estado            EstadoCita  @default(pendiente)
+  descuentoAplicado Boolean     @default(false)
+  createdAt         DateTime    @default(now())
+  paciente          User        @relation(fields: [pacienteId], references: [id])
+  medico            Doctor      @relation(fields: [medicoId], references: [id])
+}

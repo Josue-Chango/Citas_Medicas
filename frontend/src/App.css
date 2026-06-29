@@ -1,0 +1,311 @@
+.app-navbar {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
+  box-shadow: 0 2px 16px rgba(46, 204, 113, 0.25);
+}
+
+.app-navbar .navbar-brand {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  font-size: 1.3rem;
+}
+
+.app-navbar .nav-link {
+  font-weight: 500;
+  padding: 0.5rem 1rem !important;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.app-navbar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-logout {
+  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  padding: 0.4rem 1rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+}
+
+.btn-logout:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--gray-600);
+  font-size: 0.85rem;
+}
+
+.login-wrapper {
+  width: 100%;
+  max-width: 440px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.login-header .brand-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.8rem;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(46, 204, 113, 0.3);
+}
+
+.login-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.login-header p {
+  color: var(--gray-600);
+  font-size: 0.9rem;
+}
+
+.login-card {
+  padding: 2rem;
+}
+
+.login-card .form-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--gray-900);
+}
+
+.login-card .form-control {
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  border: 1.5px solid var(--gray-200);
+  transition: all 0.2s;
+}
+
+.login-card .form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.15);
+}
+
+.btn-primary {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+.btn-primary:hover {
+  background: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+}
+
+.login-footer {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--gray-200);
+  font-size: 0.8rem;
+}
+
+.login-footer small {
+  color: var(--gray-600);
+}
+
+.appointment-wrapper {
+  width: 100%;
+  max-width: 700px;
+}
+
+.appointment-card {
+  padding: 2rem;
+}
+
+.appointment-card h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--gray-900);
+}
+
+.option-btn {
+  width: 100%;
+  text-align: left;
+  padding: 0.9rem 1.2rem !important;
+  border: 1.5px solid var(--gray-200) !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  color: var(--gray-900) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+  margin-bottom: 0.5rem;
+}
+
+.option-btn:hover {
+  border-color: var(--primary) !important;
+  background: rgba(46, 204, 113, 0.06) !important;
+  transform: translateX(4px);
+}
+
+.time-btn {
+  padding: 0.7rem !important;
+  border-radius: 10px !important;
+  border: 1.5px solid var(--gray-200) !important;
+  background: #fff !important;
+  color: var(--gray-900) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+}
+
+.time-btn:hover {
+  border-color: var(--primary) !important;
+  background: rgba(46, 204, 113, 0.06) !important;
+}
+
+.time-btn.selected {
+  border-color: var(--success) !important;
+  background: rgba(25, 135, 84, 0.08) !important;
+  color: var(--success) !important;
+}
+
+.section-subtitle {
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  margin-bottom: 1rem;
+}
+
+.resumen-card {
+  background: var(--gray-50);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--gray-200);
+}
+
+.resumen-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.resumen-item:last-child {
+  border-bottom: none;
+}
+
+.resumen-item .label {
+  font-size: 0.85rem;
+  color: var(--gray-600);
+}
+
+.resumen-item .value {
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.confirmado-icon {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #198754, #157347);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2rem;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(25, 135, 84, 0.3);
+}
+
+.citas-wrapper {
+  width: 100%;
+  max-width: 800px;
+}
+
+.citas-card {
+  padding: 2rem;
+}
+
+.citas-card h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.citas-table {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+}
+
+.citas-table thead th {
+  background: var(--gray-50);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gray-600);
+  padding: 0.9rem 1rem;
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.citas-table tbody td {
+  padding: 0.9rem 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.citas-table tbody tr:hover {
+  background: rgba(46, 204, 113, 0.04);
+}
+
+.citas-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-state .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.empty-state h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: var(--gray-600);
+  margin-bottom: 1.5rem;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  align-items: center;
+}
+
+.option-card {
+  cursor: pointer;
+  border: 1.5px solid var(--gray-200) !important;
+  border-radius: 12px !important;
+  transition: all 0.2s;
+}
+
+.option-card:hover {
+  border-color: var(--primary) !important;
+  background: rgba(46, 204, 113, 0.04);
+  transform: translateX(4px);
+}

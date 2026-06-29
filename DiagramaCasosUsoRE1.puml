@@ -1,0 +1,55 @@
+@startuml
+'Direccion del diagrama: de izquierda a derecha para mejor lectura'
+
+left to right Direction
+
+'1 Definicion de los actores'
+'El paciente es el indicador principal del proceso'
+
+actor "Paciente" as paciente
+
+'El notificado es un actor secundario (sistema esterno que reacciona)
+actor "Sistema de notificaciones" as notificador
+
+'2 limite del sistema (System Boundary)
+'Todo lo que esta dentro del rectangulo es el codigo que yo voy a hacer mas tardecita en mi casa (programar)
+
+rectangle "Sistema de Gestion de Citas Medicas"{
+    'Definicion de los casos de uso
+    usecase "Iniciar Sesion" as UC_Login
+    usecase "Reservar cita medica" as UC_Reservar
+    usecase "Consultar Horarios Disponibles" as UC_Consultar
+    usecase "Enviar Confirmacion" as UC_Notificar
+
+    'Ejemplo de un caso de uso opcional para explicar el <<extend>>
+    usecase "Aplicar descuento Aseguradora" as UC_Descuento
+
+    'Relaciones principales llamadas tambien asociadas
+    paciente --> UC_Reservar
+    UC_Notificar --> notificador
+
+    'Relaciones de dependencia include y extends
+    'Usamos include porque son pasos obligatorios para que la reserva exist
+    UC_Reservar ..> UC_Login : <<include>>
+    UC_Reservar ..> UC_Consultar : <<include>>
+    UC_Reservar ..> UC_Notificar : <<include>>
+    
+    'Usamos extend porque aplicar un descuento solo pasa bajo ciertas condiciones
+    UC_Descuento .up.>UC_Reservar : <<extend>>
+
+}
+
+'Notas visuales para el diagrama
+    note right of UC_Reservar
+        El caso de uso principal.
+        No puede eliminar con exito
+        sin ejecutar sus "includes"
+    end note
+
+    note right of UC_Descuento
+        Se ejecuta solamente si el
+        paciente tiene seguro medico 
+        (opcional)
+    end note
+
+@enduml

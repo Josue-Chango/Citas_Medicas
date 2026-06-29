@@ -1,0 +1,46 @@
+@startuml
+
+' Configuracion basica como va a ser la lectura del documento
+
+left to right direction
+
+skinparam PackageStile rectangle
+
+' 1 definicion delos actores
+
+actor "Paciente" as paciente 
+actor "Sistema de notificaciones" as notificador
+
+'2 Limite de sistema
+
+rectangle "Sistema de gestion de citas medicas RF-2"{
+    'Casos de uso principales
+    usecase "Iniciar Sesion" as UC_Login
+    usecase "Consultar mis citas medicas" as UC_ConsultarCitas
+    usecase "Cancelar Cita Medica" as UC_Cancelar
+    usecase "Enviar Notificacion de Cancelacion" as UC_Notificar
+
+}
+
+'3 Asociaciones directas
+paciente --> UC_ConsultarCitas
+paciente --> UC_Cancelar
+UC_Notificar --> notificador
+
+'4 relaciones de dependencia
+UC_ConsultarCitas ..> UC_Login : <<include>>
+UC_Cancelar ..> UC_Login : <<include>>
+UC_Cancelar ..> UC_ConsultarCitas : <<include>>
+
+'Si la cancelacion se completa es necesario notificar
+UC_Cancelar ..> UC_Notificar : <<include>>
+
+'Extends se da en el caso que el sistema aplique alguna penalidad
+'por cancelar una cita de manera tardia
+
+'6 notas
+
+note bottom of UC_Cancelar
+    Condicion:
+    {Tiempo para cancelar la cita <24 horas}
+end note

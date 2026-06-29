@@ -1,0 +1,46 @@
+[
+  {
+    "id": "CITA-1782353259375",
+    "pacienteId": "2",
+    "medicoId": "2",
+    "especialidad": "Cardiología",
+    "fecha": "2026-06-26",
+    "hora": "16:30",
+    "estado": "pendiente",
+    "descuentoAplicado": false,
+    "createdAt": "2026-06-25T02:07:39.375Z"
+  },
+  {
+    "id": "CITA-1782353444935",
+    "pacienteId": "2",
+    "medicoId": "2",
+    "especialidad": "Cardiología",
+    "fecha": "2026-06-26",
+    "hora": "16:00",
+    "estado": "pendiente",
+    "descuentoAplicado": false,
+    "createdAt": "2026-06-25T02:10:44.935Z"
+  },
+  {
+    "id": "CITA-1782353518419",
+    "pacienteId": "1",
+    "medicoId": "2",
+    "especialidad": "Cardiología",
+    "fecha": "2026-06-26",
+    "hora": "15:30",
+    "estado": "pendiente",
+    "descuentoAplicado": true,
+    "createdAt": "2026-06-25T02:11:58.419Z"
+  },
+  {
+    "id": "CITA-1782356662896",
+    "pacienteId": "2",
+    "medicoId": "2",
+    "especialidad": "Cardiología",
+    "fecha": "2026-06-26",
+    "hora": "15:00",
+    "estado": "pendiente",
+    "descuentoAplicado": false,
+    "createdAt": "2026-06-25T03:04:22.896Z"
+  }
+]

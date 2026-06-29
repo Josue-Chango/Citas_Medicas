@@ -1,0 +1,95 @@
+@startuml
+
+'configurcion visual del proyecto
+
+skinparam MaxMessageSize 150
+skinparam BoxPadding 10
+autonumber "<b>[00]"
+
+'1 Definicion de las lineas de vida (life liners)'
+actor "Paciente" as pac
+box "Frontend (Vista)" #F8F9F9
+    boundary "IntefazWeb" as url
+end box
+
+box "Backtend (Logica)" #EAEDED
+    control "ControladorCitas" as ctrl
+end box
+
+box "Persistencia he integracion" #EAEDED
+    entity "BaseDatos" as bd
+    boundary "API notificaciones" as notif
+end box
+
+'2 Consulta citas
+pac -> ui : clic("Mis Citas")
+activate ui
+
+ui -> ctrl : getCitasFuturas(idPaciente)
+activate ctrl
+
+ctrl -> bd : "SELECT * From citas WHERE id= idPaciente"
+activate bd
+
+bd --> ctrl : "ResulSet(Lista de Citas)"
+deactivate bd
+
+ctrl --> ui : JSON {citas_Futuras}
+deactivate ctrl
+
+ui --> pac : Renderiza listado en pantalla
+deactivate ui
+
+' 3 Fase de cancelacion
+
+pac -> ui : clic("Cancelar Cita ID")
+activate ui
+
+ui -> ctrl : ProcesarCancelacion
+activate ctrl
+
+'Procesamiento interno
+ctrl -> ctrl : calcularDiferenciaHoras(fechaCita, fechaActual)
+
+'Bloque Condicional
+alt Faltan mas de 24 horas (Regla Cumplida)
+
+ctrl --> ui : RequiereConfirmacion()
+ui --> pac : Mostral Modal "Seguro que desea cancelar?"
+
+pac -> ui : clic("Confirmar")
+ui -> ctrl : confirmarCancelacion
+
+' transaccion de la base de datos
+ctrl ->bd : UPDATE citas SET estado = 'Cancelada'
+activate bd
+
+bd ->ctrl : 200 ok
+deactivate bd
+
+ctrl ->bd : UPDATE agenda SET estado = 'Disponible'
+activate bd
+
+bd ->ctrl : 200 ok
+deactivate bd
+
+'Proceso asincrono hacia el sistema externo
+
+ctrl --> notif : Post/enviarEmail (plantilla_cancelada)
+ctrl --> ui : 200 ok (Transacion Exitosa)
+ui --> pac :Mostrar Mensaje; "Cita anulada con Exito"
+else Faltan menos de 24 horas (Regla Rota)
+
+'Flujo de excepcion
+
+ctrl -> bd: INSERT INTO penalidades (id_paciente, motivo)
+activate bd
+bd -->ctrl:200 ok
+deactivate bd
+
+ctrl --> ui : 403 Forbiden (Fuera de tiempo)
+ui --> pac: Mostrar error: "No se puede cancelar penalidad aplicada"
+end
+deactivate ctrl
+deactivate ui
+@enduml

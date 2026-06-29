@@ -1,0 +1,41 @@
+@startuml
+
+'Configuracion de colores
+
+skinparam ActivityBackgroundColor #E8F8F5
+skinparam ActivityBorderColor #117A65
+skinparam ArrowColor #212F3D
+
+' Inicio del proceso
+
+start
+
+'Tareas secuenciales se escriben entre 2 puntos (:) y punto y coma ();'
+
+:Paciente selecciona "Mis citas";
+:Paciente elige una cita y presiona "Cancelar";
+
+'Nodo de desicion con puerta logica if else
+
+if(?Faltan mas de 24 horas para la fecha agendada?) then (si)
+    :Sistema muestra advertencia de confirmacion;
+    if(El paciente confirma la cancelacion?) then (si)
+        'tareas en paralelo
+        fork
+            :Actualizar estado de reserva a "Cancelar";
+        fork again
+            :Liberar bloque horario en agenda del medico;
+        fork again
+            :Enviar notificacion (email/sms);
+        end fork
+        :Mostrar mensaje de exito;
+    else (no)
+        :Mantener la cita sin cambios;
+    end if
+else (no)
+    'flujo alternativo de excepcion
+    :Mostrar mensaje de error: "Tiempo limite superado";
+end if
+'Fin del proceso
+stop
+@enduml
