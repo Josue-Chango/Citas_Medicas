@@ -3,6 +3,7 @@ import cors from 'cors';
 import authRoutes from './routes/auth.routes';
 import scheduleRoutes from './routes/schedule.routes';
 import appointmentsRoutes from './routes/appointments.routes';
+import { cancelarCitasVencidas } from './services/appointments.service';
 
 const app = express();
 const PORT = 3000;
@@ -20,4 +21,6 @@ app.get('/api/health', (_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  cancelarCitasVencidas();
+  setInterval(cancelarCitasVencidas, 5 * 60 * 1000);
 });

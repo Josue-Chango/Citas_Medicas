@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Card, Button, Table, Modal, Form } from 'react-bootstrap';
+import { Card, Button, Table, Modal, Form, Spinner } from 'react-bootstrap';
 import { getCitas, cancelarCita, getToken } from '../api/client';
 import type { Appointment, NotificationResult } from '../types';
 
@@ -19,6 +19,7 @@ export default function MyAppointmentsPage() {
   const [notif, setNotif] = useState<NotificationResult | null>(null);
   const [verCanceladas, setVerCanceladas] = useState(false);
   const [verConfirmadas, setVerConfirmadas] = useState(false);
+  const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -31,15 +32,16 @@ export default function MyAppointmentsPage() {
     if (!citaCancelar) return;
     setError('');
     setNotif(null);
+    setCitaCancelar(null);
+    setCargando(true);
     try {
       const resp = await cancelarCita(citaCancelar.id);
       setNotif(resp.notificacion);
-      setExito(`Cita de ${citaCancelar.especialidad} cancelada exitosamente.`);
-      setCitaCancelar(null);
-      getCitas().then(setCitas);
+      setExito(`Se ha enviado un correo a tu email para confirmar la cancelación de la cita de ${citaCancelar.especialidad}.`);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al cancelar la cita');
-      setCitaCancelar(null);
+      setError(err.response?.data?.error || 'Error al solicitar la cancelación');
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -52,6 +54,15 @@ export default function MyAppointmentsPage() {
 
   return (
     <div className="page-container">
+      {cargando && (
+        <div className="loading-overlay">
+          <div className="loading-spinner">
+            <Spinner animation="border" variant="danger" />
+            <p className="mt-2 mb-0 fw-semibold">Enviando solicitud de cancelación...</p>
+            <small className="text-muted">Revisa tu correo para confirmar</small>
+          </div>
+        </div>
+      )}
       <div className="citas-wrapper fade-in">
         <Card className="card-moderno citas-card">
           <div className="d-flex align-items-center justify-content-between mb-4">
@@ -137,6 +148,8 @@ export default function MyAppointmentsPage() {
                     <th>Médico</th>
                     <th>Fecha</th>
                     <th>Hora</th>
+                    <th>Precio base</th>
+                    <th>Total</th>
                     <th>Estado</th>
                     <th></th>
                   </tr>
@@ -144,13 +157,16 @@ export default function MyAppointmentsPage() {
                 <tbody>
                   {citasFiltradas.map(c => {
                     const st = STATUS_MAP[c.estado] || { label: c.estado, variant: 'secondary' };
-                    const cancelable = c.estado === 'pendiente' || c.estado === 'confirmada';
+                    const yaPaso = new Date(`${c.fecha}T${c.hora}`) < new Date();
+                    const cancelable = (c.estado === 'pendiente' || c.estado === 'confirmada') && !yaPaso;
                     return (
                       <tr key={c.id}>
                         <td className="fw-medium">{c.especialidad}</td>
                         <td>{c.medicoNombre}</td>
                         <td>{c.fecha}</td>
                         <td>{c.hora}</td>
+                        <td>${c.precioBase.toFixed(2)}</td>
+                        <td>${c.precio.toFixed(2)}{c.descuentoAplicado && <small className="text-success ms-1">(20% dto.)</small>}</td>
                         <td>
                           <span className={`badge bg-${st.variant} bg-opacity-10 text-${st.variant} badge-estado`}>
                             {st.label}
@@ -186,6 +202,9 @@ export default function MyAppointmentsPage() {
               <div className="d-flex justify-content-between"><span className="text-muted small">Médico</span><span className="fw-medium">{citaCancelar.medicoNombre}</span></div>
               <div className="d-flex justify-content-between"><span className="text-muted small">Fecha</span><span className="fw-medium">{citaCancelar.fecha}</span></div>
               <div className="d-flex justify-content-between"><span className="text-muted small">Hora</span><span className="fw-medium">{citaCancelar.hora}</span></div>
+              <div className="d-flex justify-content-between"><span className="text-muted small">Precio original</span><span className="fw-medium">${citaCancelar.precioBase.toFixed(2)}</span></div>
+              {citaCancelar.descuentoAplicado && <div className="d-flex justify-content-between"><span className="text-muted small">Descuento (20%)</span><span className="fw-medium text-danger">-${(citaCancelar.precioBase - citaCancelar.precio).toFixed(2)}</span></div>}
+              <div className="d-flex justify-content-between"><span className="text-muted small">Total</span><span className="fw-medium">${citaCancelar.precio.toFixed(2)}</span></div>
             </div>
           )}
           <p className="text-muted small mt-2 mb-0">Esta acción no se puede deshacer.</p>

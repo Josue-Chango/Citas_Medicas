@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Button, Spinner } from 'react-bootstrap';
 import { getEspecialidades, getMedicos, getHorarios, reservarCita, getToken } from '../api/client';
 import type { Doctor, ScheduleSlot, NotificationResult } from '../types';
+import CalendarPicker from '../components/CalendarPicker';
 
 type Step = 'especialidad' | 'medico' | 'horario' | 'resumen' | 'confirmado';
 
@@ -12,6 +13,20 @@ const STEPS = [
   { key: 'horario', label: 'Horario' },
   { key: 'resumen', label: 'Resumen' },
 ];
+
+const PRECIOS: Record<string, number> = {
+  Cardiología: 150,
+  Dermatología: 100,
+  Pediatría: 80,
+};
+
+const DESCUENTO_SEGURO = 0.2;
+
+function calcularPrecios(especialidad: string, tieneSeguro: boolean): { precioBase: number; precio: number } {
+  const precioBase = PRECIOS[especialidad] || 100;
+  const precio = tieneSeguro ? Math.round(precioBase * (1 - DESCUENTO_SEGURO) * 100) / 100 : precioBase;
+  return { precioBase, precio };
+}
 
 export default function AppointmentPage() {
   const navigate = useNavigate();
@@ -26,10 +41,18 @@ export default function AppointmentPage() {
   const [error, setError] = useState('');
   const [notif, setNotif] = useState<NotificationResult | null>(null);
   const [cargando, setCargando] = useState(false);
+  const [userTieneSeguro, setUserTieneSeguro] = useState(false);
 
   useEffect(() => {
     if (!getToken()) { navigate('/'); return; }
     getEspecialidades().then(setEspecialidades);
+    const userStr = localStorage.getItem('auth_user');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        setUserTieneSeguro(u.tieneSeguro);
+      } catch {}
+    }
   }, [navigate]);
 
   const selectEspecialidad = (esp: string) => {
@@ -85,7 +108,8 @@ export default function AppointmentPage() {
             </div>
             <h2 className="fw-bold mb-2">¡Cita Confirmada!</h2>
             <p className="text-muted mb-1">Tu cita de <strong>{selectedEsp}</strong> con <strong>{selectedDoc?.nombre}</strong></p>
-            <p className="text-muted mb-3">Fecha: <strong>{selectedFecha}</strong> a las <strong>{selectedHora}</strong></p>
+            <p className="text-muted mb-1">Fecha: <strong>{selectedFecha}</strong> a las <strong>{selectedHora}</strong></p>
+            {(() => { const p = calcularPrecios(selectedEsp, userTieneSeguro); return <><p className="text-muted mb-1">Precio original: <strong>${p.precioBase.toFixed(2)}</strong></p>{userTieneSeguro && <p className="text-muted mb-1">Descuento seguro (20%): <strong className="text-danger">-${(p.precioBase - p.precio).toFixed(2)}</strong></p>}<p className="text-muted mb-3">Total: <strong>${p.precio.toFixed(2)}</strong></p></>; })()}
             {notif && (
               <div className={`alert ${notif.exito ? 'alert-success' : 'alert-warning'} py-2 mb-3 d-flex align-items-center gap-2`}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -167,36 +191,83 @@ export default function AppointmentPage() {
 
           {step === 'horario' && (
             <div>
-              <h2>Selecciona fecha y hora</h2>
-              <p className="section-subtitle">Médico: <strong className="text-primary">{selectedDoc?.nombre}</strong></p>
-              <div className="mb-3">
-                <label className="form-label fw-semibold small">Fecha</label>
-                <input type="date" className="form-control" min={hoy} value={selectedFecha || hoy}
-                  onChange={async e => {
-                    setSelectedFecha(e.target.value);
-                    if (selectedDoc) {
-                      const slots = await getHorarios(selectedDoc.id, e.target.value);
-                      setHorarios(slots);
-                    }
-                  }}
-                  style={{ maxWidth: 260 }} />
+              <div className="d-flex align-items-center justify-content-between mb-3">
+                <h2 className="mb-0">Selecciona fecha y hora</h2>
               </div>
-              {horarios.length > 0 ? (
-                <div>
-                  <label className="form-label fw-semibold small">Horarios disponibles</label>
-                  <div className="d-flex flex-wrap gap-2">
-                    {horarios.map(slot => (
-                      <button key={slot.id} onClick={() => selectHorario(selectedFecha, slot.hora)}
-                        className={`time-btn ${selectedHora === slot.hora ? 'selected' : ''}`}
-                        style={{ minWidth: 80 }}>
-                        {slot.hora}
-                      </button>
-                    ))}
+              <p className="section-subtitle">Médico: <strong className="text-primary">{selectedDoc?.nombre}</strong></p>
+
+              <CalendarPicker
+                value={selectedFecha}
+                minDate={hoy}
+                onChange={async (date) => {
+                  setSelectedFecha(date);
+                  setSelectedHora('');
+                  if (selectedDoc) {
+                    const slots = await getHorarios(selectedDoc.id, date);
+                    setHorarios(slots);
+                  }
+                }}
+              />
+
+              {selectedFecha && horarios.length > 0 && (
+                <div className="slots-container">
+                  <div className="slots-label">
+                    Horarios disponibles
+                    <span className="slots-count">{horarios.length}</span>
                   </div>
+
+                  {(() => {
+                    const manana = horarios.filter(s => {
+                      const h = parseInt(s.hora.split(':')[0]);
+                      return h < 12;
+                    });
+                    const tarde = horarios.filter(s => {
+                      const h = parseInt(s.hora.split(':')[0]);
+                      return h >= 12;
+                    });
+
+                    return (
+                      <>
+                        {manana.length > 0 && (
+                          <div className="slots-block">
+                            <div className="slots-block-label">Mañana</div>
+                            <div className="slots-grid">
+                              {manana.map(slot => (
+                                <button key={slot.id} onClick={() => selectHorario(selectedFecha, slot.hora)}
+                                  className={`time-btn ${selectedHora === slot.hora ? 'selected' : ''}`}>
+                                  {slot.hora}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {tarde.length > 0 && (
+                          <div className="slots-block">
+                            <div className="slots-block-label">Tarde</div>
+                            <div className="slots-grid">
+                              {tarde.map(slot => (
+                                <button key={slot.id} onClick={() => selectHorario(selectedFecha, slot.hora)}
+                                  className={`time-btn ${selectedHora === slot.hora ? 'selected' : ''}`}>
+                                  {slot.hora}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
-              ) : (
-                selectedFecha && <p className="text-muted small mt-2">Selecciona una fecha para ver horarios disponibles</p>
               )}
+
+              {selectedFecha && horarios.length === 0 && (
+                <div className="slots-empty mt-4">
+                  <div className="slots-empty-icon">🕐</div>
+                  <div className="slots-empty-text">No hay horarios disponibles para esta fecha</div>
+                  <div className="slots-empty-sub">Selecciona otra fecha para ver disponibilidad</div>
+                </div>
+              )}
+
               <div className="nav-buttons">
                 <Button variant="outline-secondary" size="sm" onClick={() => setStep('medico')}>
                   ← Atrás
@@ -224,6 +295,20 @@ export default function AppointmentPage() {
                 <div className="resumen-item">
                   <span className="label">Hora</span>
                   <span className="value">{selectedHora}</span>
+                </div>
+                <div className="resumen-item">
+                  <span className="label">Precio original</span>
+                  <span className="value">${calcularPrecios(selectedEsp, false).precioBase.toFixed(2)}</span>
+                </div>
+                {userTieneSeguro && (
+                  <div className="resumen-item">
+                    <span className="label">Descuento seguro (20%)</span>
+                    <span className="value text-danger">-${(calcularPrecios(selectedEsp, false).precioBase - calcularPrecios(selectedEsp, true).precio).toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="resumen-item">
+                  <span className="label">Total</span>
+                  <span className="value fw-bold">${calcularPrecios(selectedEsp, userTieneSeguro).precio.toFixed(2)}</span>
                 </div>
               </div>
               {error && <div className="alert alert-danger py-2 mt-3">{error}</div>}

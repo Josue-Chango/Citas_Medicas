@@ -8,6 +8,8 @@
     "hora": "16:30",
     "estado": "pendiente",
     "descuentoAplicado": false,
+    "precioBase": 150,
+    "precio": 150,
     "createdAt": "2026-06-25T02:07:39.375Z"
   },
   {
@@ -19,6 +21,8 @@
     "hora": "16:00",
     "estado": "pendiente",
     "descuentoAplicado": false,
+    "precioBase": 150,
+    "precio": 150,
     "createdAt": "2026-06-25T02:10:44.935Z"
   },
   {
@@ -30,6 +34,8 @@
     "hora": "15:30",
     "estado": "pendiente",
     "descuentoAplicado": true,
+    "precioBase": 150,
+    "precio": 120,
     "createdAt": "2026-06-25T02:11:58.419Z"
   },
   {
@@ -41,6 +47,8 @@
     "hora": "15:00",
     "estado": "pendiente",
     "descuentoAplicado": false,
+    "precioBase": 150,
+    "precio": 150,
     "createdAt": "2026-06-25T03:04:22.896Z"
   }
 ]

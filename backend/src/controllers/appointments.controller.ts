@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { crearCita, obtenerCitasPorPaciente, cancelarCita, confirmarCita } from '../services/appointments.service';
-import { enviarConfirmacion, enviarCancelacion } from '../services/notifications.service';
+import { crearCita, obtenerCitasPorPaciente, solicitarCancelacion, confirmarCancelacion, confirmarCita } from '../services/appointments.service';
+import { enviarConfirmacion, enviarSolicitudCancelacion } from '../services/notifications.service';
 import prisma from '../data/database';
 
 export async function reservarCita(req: Request, res: Response): Promise<void> {
@@ -43,13 +43,27 @@ export async function confirmarCitaHandler(req: Request, res: Response): Promise
 export async function cancelarCitaHandler(req: Request, res: Response): Promise<void> {
   const pacienteId = (req as any).userId;
   const id = req.params.id as string;
-  const resultado = await cancelarCita(pacienteId, id);
+  const resultado = await solicitarCancelacion(pacienteId, id);
   if ('error' in resultado) {
     res.status(400).json({ error: resultado.error });
     return;
   }
   const paciente = await prisma.user.findUnique({ where: { id: pacienteId } });
   if (!paciente) { res.status(404).json({ error: 'Paciente no encontrado' }); return; }
-  const evento = await enviarCancelacion(resultado, paciente.email);
+  const evento = await enviarSolicitudCancelacion(resultado, paciente.email);
   res.json({ cita: resultado, notificacion: evento });
+}
+
+export async function confirmarCancelacionHandler(req: Request, res: Response): Promise<void> {
+  const { citaId, token } = req.body;
+  if (!citaId || !token) {
+    res.status(400).json({ error: 'citaId y token son requeridos' });
+    return;
+  }
+  const result = await confirmarCancelacion(citaId, token);
+  if ('error' in result) {
+    res.status(400).json({ error: result.error });
+    return;
+  }
+  res.json({ message: 'Cita cancelada exitosamente', cita: result });
 }

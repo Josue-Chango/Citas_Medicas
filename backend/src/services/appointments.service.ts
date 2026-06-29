@@ -1,11 +1,15 @@
 import { createHmac } from 'crypto';
 import prisma from '../data/database';
-import { CreateAppointmentRequest } from '../models/appointment.model';
+import { CreateAppointmentRequest, calcularPrecio } from '../models/appointment.model';
 
 const CONFIRM_SECRET = process.env.CONFIRM_SECRET || 'especitas-confirm-secret';
 
 export function generarTokenConfirmacion(citaId: string): string {
   return createHmac('sha256', CONFIRM_SECRET).update(citaId).digest('hex');
+}
+
+export function generarTokenCancelacion(citaId: string): string {
+  return createHmac('sha256', CONFIRM_SECRET + '-cancel').update(citaId).digest('hex');
 }
 
 export async function crearCita(pacienteId: string, data: CreateAppointmentRequest) {
@@ -21,6 +25,8 @@ export async function crearCita(pacienteId: string, data: CreateAppointmentReque
   });
   if (conflicto) return { error: 'El horario ya está ocupado' };
 
+  const { precioBase, precio } = calcularPrecio(data.especialidad, paciente.tieneSeguro);
+
   const cita = await prisma.appointment.create({
     data: {
       id: `CITA-${Date.now()}`,
@@ -31,6 +37,8 @@ export async function crearCita(pacienteId: string, data: CreateAppointmentReque
       hora: data.hora,
       estado: 'pendiente',
       descuentoAplicado: paciente.tieneSeguro,
+      precioBase,
+      precio,
     },
   });
 
@@ -38,6 +46,7 @@ export async function crearCita(pacienteId: string, data: CreateAppointmentReque
 }
 
 export async function obtenerCitasPorPaciente(pacienteId: string) {
+  await cancelarCitasVencidas();
   return prisma.appointment.findMany({
     where: { pacienteId },
     include: { medico: true },
@@ -45,7 +54,7 @@ export async function obtenerCitasPorPaciente(pacienteId: string) {
   });
 }
 
-export async function cancelarCita(pacienteId: string, citaId: string) {
+export async function solicitarCancelacion(pacienteId: string, citaId: string) {
   const cita = await prisma.appointment.findUnique({ where: { id: citaId } });
   if (!cita) return { error: 'Cita no encontrada' };
   if (cita.pacienteId !== pacienteId) return { error: 'No tienes permiso para cancelar esta cita' };
@@ -58,10 +67,42 @@ export async function cancelarCita(pacienteId: string, citaId: string) {
 
   if (diffMs < hours24) return { error: 'Tiempo limite superado. No puedes cancelar una cita con menos de 24 horas de anticipación.' };
 
+  return cita;
+}
+
+export async function confirmarCancelacion(citaId: string, token: string) {
+  const esperado = generarTokenCancelacion(citaId);
+  if (token !== esperado) return { error: 'Token de cancelación inválido' };
+
+  const cita = await prisma.appointment.findUnique({ where: { id: citaId } });
+  if (!cita) return { error: 'Cita no encontrada' };
+  if (cita.estado === 'cancelada') return { error: 'La cita ya fue cancelada' };
+
   return prisma.appointment.update({
     where: { id: citaId },
     data: { estado: 'cancelada' },
   });
+}
+
+export async function cancelarCitasVencidas() {
+  const pendientes = await prisma.appointment.findMany({
+    where: { estado: 'pendiente' },
+  });
+
+  const ahora = new Date();
+  const vencidas = pendientes.filter(c => {
+    const citaFecha = new Date(`${c.fecha}T${c.hora}`);
+    return citaFecha < ahora;
+  });
+
+  for (const c of vencidas) {
+    await prisma.appointment.update({
+      where: { id: c.id },
+      data: { estado: 'cancelada' },
+    });
+  }
+
+  return { canceladas: vencidas.length };
 }
 
 export async function confirmarCita(citaId: string, token: string) {

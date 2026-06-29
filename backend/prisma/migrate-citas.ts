@@ -38,6 +38,8 @@ async function migrar() {
         hora: cita.hora,
         estado: cita.estado,
         descuentoAplicado: cita.descuentoAplicado,
+        precioBase: cita.precioBase ?? cita.precio ?? 0,
+        precio: cita.precio ?? 0,
         createdAt: new Date(cita.createdAt),
       },
     });

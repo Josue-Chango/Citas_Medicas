@@ -40,6 +40,8 @@ model Appointment {
   hora              String
   estado            EstadoCita  @default(pendiente)
   descuentoAplicado Boolean     @default(false)
+  precioBase        Float       @default(0)
+  precio            Float       @default(0)
   createdAt         DateTime    @default(now())
   paciente          User        @relation(fields: [pacienteId], references: [id])
   medico            Doctor      @relation(fields: [medicoId], references: [id])

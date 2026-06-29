@@ -87,3 +87,7 @@ export async function cancelarCita(id: string): Promise<CitaResponse> {
 export async function confirmarCita(citaId: string, token: string): Promise<void> {
   await api.post('/appointments/confirmar', { citaId, token });
 }
+
+export async function confirmarCancelacion(citaId: string, token: string): Promise<void> {
+  await api.post('/appointments/cancelar-confirmar', { citaId, token });
+}

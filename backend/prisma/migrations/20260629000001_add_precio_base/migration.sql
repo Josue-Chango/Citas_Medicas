@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Appointment" ADD COLUMN "precioBase" DOUBLE PRECISION NOT NULL DEFAULT 0;

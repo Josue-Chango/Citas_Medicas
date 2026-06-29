@@ -35,6 +35,8 @@ export interface Appointment {
   hora: string;
   estado: 'pendiente' | 'confirmada' | 'cancelada' | 'completada';
   descuentoAplicado: boolean;
+  precioBase: number;
+  precio: number;
   createdAt: string;
 }
 

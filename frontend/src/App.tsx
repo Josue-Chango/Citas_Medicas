@@ -3,6 +3,7 @@ import { Navbar, Container, Nav, Button } from 'react-bootstrap';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ConfirmarCitaPage from './pages/ConfirmarCitaPage';
+import CancelarCitaPage from './pages/CancelarCitaPage';
 import HomePage from './pages/HomePage';
 import AppointmentPage from './pages/AppointmentPage';
 import MyAppointmentsPage from './pages/MyAppointmentsPage';
@@ -72,6 +73,7 @@ function AppContent() {
         <Route path="/" element={<HomeOrLogin />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/confirmar" element={<ConfirmarCitaPage />} />
+        <Route path="/cancelar" element={<CancelarCitaPage />} />
         <Route path="/agendar" element={<ProtectedRoute><AppointmentPage /></ProtectedRoute>} />
         <Route path="/mis-citas" element={<ProtectedRoute><MyAppointmentsPage /></ProtectedRoute>} />
       </Routes>
