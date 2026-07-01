@@ -23,3 +23,14 @@ export interface RegisterRequest {
   password: string;
   tieneSeguro: boolean;
 }
+
+export interface UpdateProfileRequest {
+  nombre?: string;
+  email?: string;
+  tieneSeguro?: boolean;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}

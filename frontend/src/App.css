@@ -560,12 +560,163 @@
   opacity: 0.7;
 }
 
-@media (max-width: 480px) {
-  .calendar-picker {
-    padding: 1rem;
+  @media (max-width: 480px) {
+    .calendar-picker {
+      padding: 1rem;
+    }
+  
+    .calendar-cell {
+      font-size: 0.78rem;
+    }
   }
-
-  .calendar-cell {
-    font-size: 0.78rem;
+  
+  /* ── User Menu Dropdown ── */
+  
+  .user-menu {
+    position: relative;
   }
-}
+  
+  .user-menu-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  
+  .user-menu-trigger:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .user-menu-chevron {
+    transition: transform 0.2s;
+  }
+  
+  .user-menu-chevron.open {
+    transform: rotate(180deg);
+  }
+  
+  .user-menu-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 200px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--gray-200);
+    padding: 0.4rem;
+    z-index: 1000;
+    animation: fadeIn 0.15s ease;
+  }
+  
+  .user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--gray-900);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  
+  .user-menu-item:hover {
+    background: var(--gray-100);
+  }
+  
+  .user-menu-item.text-danger {
+    color: var(--danger);
+  }
+  
+  .user-menu-item.text-danger:hover {
+    background: rgba(220, 53, 69, 0.08);
+  }
+  
+  .user-menu-divider {
+    height: 1px;
+    background: var(--gray-200);
+    margin: 0.25rem 0.5rem;
+  }
+  
+  /* ── Settings Page ── */
+  
+  .settings-wrapper {
+    width: 100%;
+    max-width: 560px;
+  }
+  
+  .settings-card {
+    padding: 1.5rem;
+  }
+  
+  .settings-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  
+  .form-label-custom {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--gray-900);
+    margin-bottom: 0.35rem;
+  }
+  
+  .form-control-custom {
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    border: 1.5px solid var(--gray-200);
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+  
+  .form-control-custom:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.15);
+  }
+  
+  .form-switch-custom .form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+  
+  .form-switch-custom .form-check-input:focus {
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.15);
+  }
+  
+  .btn-back {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--gray-200);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--gray-600);
+  }
+  
+  .btn-back:hover {
+    background: var(--gray-100);
+    border-color: var(--primary);
+    color: var(--primary);
+  }

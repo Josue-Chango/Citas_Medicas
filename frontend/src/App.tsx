@@ -7,6 +7,8 @@ import CancelarCitaPage from './pages/CancelarCitaPage';
 import HomePage from './pages/HomePage';
 import AppointmentPage from './pages/AppointmentPage';
 import MyAppointmentsPage from './pages/MyAppointmentsPage';
+import SettingsPage from './pages/SettingsPage';
+import UserMenu from './components/UserMenu';
 import { getToken, getUser, logout } from './api/client';
 import './App.css';
 
@@ -29,18 +31,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                 <Nav.Link as={Link} to="/mis-citas">Mis Citas</Nav.Link>
               </Nav>
               <div className="d-flex align-items-center gap-3">
-                {user && (
-                  <span className="text-light small d-flex align-items-center gap-1">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-                    </svg>
-                    {user.nombre}
-                  </span>
-                )}
-                <Button variant="outline-light" size="sm" className="btn-logout"
-                  onClick={() => { logout(); window.location.href = '/'; }}>
-                  Cerrar Sesión
-                </Button>
+                {user && <UserMenu nombre={user.nombre} />}
               </div>
             </Navbar.Collapse>
           </Container>
@@ -76,6 +67,7 @@ function AppContent() {
         <Route path="/cancelar" element={<CancelarCitaPage />} />
         <Route path="/agendar" element={<ProtectedRoute><AppointmentPage /></ProtectedRoute>} />
         <Route path="/mis-citas" element={<ProtectedRoute><MyAppointmentsPage /></ProtectedRoute>} />
+        <Route path="/configuracion" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       </Routes>
     </Layout>
   );

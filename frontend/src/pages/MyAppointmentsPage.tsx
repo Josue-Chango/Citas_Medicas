@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, Button, Table, Modal, Form, Spinner } from 'react-bootstrap';
-import { getCitas, cancelarCita, getToken } from '../api/client';
+import { getCitas, cancelarCita, reenviarConfirmacion, getToken, getUser } from '../api/client';
 import type { Appointment, NotificationResult } from '../types';
 
 const STATUS_MAP: Record<string, { label: string; variant: string }> = {
@@ -14,14 +14,18 @@ const STATUS_MAP: Record<string, { label: string; variant: string }> = {
 export default function MyAppointmentsPage() {
   const [citas, setCitas] = useState<Appointment[]>([]);
   const [citaCancelar, setCitaCancelar] = useState<Appointment | null>(null);
+  const [citaReenviar, setCitaReenviar] = useState<Appointment | null>(null);
+  const [reenviarEmail, setReenviarEmail] = useState('');
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
   const [notif, setNotif] = useState<NotificationResult | null>(null);
   const [verCanceladas, setVerCanceladas] = useState(false);
   const [verConfirmadas, setVerConfirmadas] = useState(false);
   const [cargando, setCargando] = useState(false);
+  const [cargandoReenviar, setCargandoReenviar] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const user = getUser();
 
   useEffect(() => {
     if (!getToken()) { navigate('/'); return; }
@@ -42,6 +46,34 @@ export default function MyAppointmentsPage() {
       setError(err.response?.data?.error || 'Error al solicitar la cancelación');
     } finally {
       setCargando(false);
+    }
+  };
+
+  const abrirReenviar = (c: Appointment) => {
+    setCitaReenviar(c);
+    setReenviarEmail(user?.email || '');
+    setError('');
+    setExito('');
+    setNotif(null);
+  };
+
+  const handleReenviar = async () => {
+    if (!citaReenviar) return;
+    if (!reenviarEmail.trim()) { setError('El correo es requerido'); return; }
+    setCargandoReenviar(true);
+    setError('');
+    setExito('');
+    setNotif(null);
+    try {
+      const resp = await reenviarConfirmacion(citaReenviar.id, reenviarEmail.trim());
+      setCitaReenviar(null);
+      setNotif(resp.notificacion);
+      const cambioEmail = reenviarEmail.trim() !== user?.email;
+      setExito(`Correo de confirmación reenviado a ${resp.emailEnviado}${cambioEmail ? '. El email de tu cuenta ha sido actualizado.' : ''}`);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Error al reenviar el correo');
+    } finally {
+      setCargandoReenviar(false);
     }
   };
 
@@ -173,12 +205,23 @@ export default function MyAppointmentsPage() {
                           </span>
                         </td>
                         <td>
-                          {cancelable && (
-                            <Button variant="outline-danger" size="sm"
-                              onClick={() => setCitaCancelar(c)}>
-                              Cancelar
-                            </Button>
-                          )}
+                          <div className="d-flex gap-1">
+                            {c.estado === 'pendiente' && (
+                              <Button variant="outline-primary" size="sm"
+                                onClick={() => abrirReenviar(c)}
+                                title="Reenviar correo de confirmación">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M22 2L11 13" /><path d="M22 2l-7 20-4-9-9-4 20-7z" />
+                                </svg>
+                              </Button>
+                            )}
+                            {cancelable && (
+                              <Button variant="outline-danger" size="sm"
+                                onClick={() => setCitaCancelar(c)}>
+                                Cancelar
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -212,6 +255,45 @@ export default function MyAppointmentsPage() {
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setCitaCancelar(null)}>Volver</Button>
           <Button variant="danger" onClick={handleCancelar}>Sí, cancelar cita</Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={!!citaReenviar} onHide={() => { if (!cargandoReenviar) setCitaReenviar(null); }} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Reenviar correo de confirmación</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {citaReenviar && (
+            <>
+              <p>¿Estás seguro de que deseas reenviar el correo de confirmación para esta cita?</p>
+              <div className="resumen-card" style={{ background: '#f8f9fa', borderRadius: 8, padding: '0.75rem 1rem' }}>
+                <div className="d-flex justify-content-between"><span className="text-muted small">Especialidad</span><span className="fw-medium">{citaReenviar.especialidad}</span></div>
+                <div className="d-flex justify-content-between"><span className="text-muted small">Fecha</span><span className="fw-medium">{citaReenviar.fecha}</span></div>
+                <div className="d-flex justify-content-between"><span className="text-muted small">Hora</span><span className="fw-medium">{citaReenviar.hora}</span></div>
+              </div>
+              <Form.Group className="mt-3">
+                <Form.Label className="fw-semibold small">Correo electrónico</Form.Label>
+                <Form.Control
+                  type="email"
+                  value={reenviarEmail}
+                  onChange={e => setReenviarEmail(e.target.value)}
+                  className="form-control-custom"
+                  disabled={cargandoReenviar}
+                  placeholder="Correo para recibir la confirmación"
+                />
+                <Form.Text className="text-muted">
+                  Si te registraste con un correo incorrecto, puedes modificarlo aquí.
+                </Form.Text>
+              </Form.Group>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setCitaReenviar(null)} disabled={cargandoReenviar}>Volver</Button>
+          <Button variant="primary" onClick={handleReenviar} disabled={cargandoReenviar}>
+            {cargandoReenviar ? <Spinner size="sm" animation="border" className="me-1" /> : null}
+            Enviar correo
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

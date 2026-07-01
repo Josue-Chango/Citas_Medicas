@@ -91,3 +91,17 @@ export async function confirmarCita(citaId: string, token: string): Promise<void
 export async function confirmarCancelacion(citaId: string, token: string): Promise<void> {
   await api.post('/appointments/cancelar-confirmar', { citaId, token });
 }
+
+export async function actualizarPerfil(data: { nombre?: string; email?: string; tieneSeguro?: boolean }): Promise<{ user: User }> {
+  const { data: resp } = await api.put<{ user: User }>('/auth/perfil', data);
+  return resp;
+}
+
+export async function cambiarPassword(currentPassword: string, newPassword: string): Promise<void> {
+  await api.put('/auth/password', { currentPassword, newPassword });
+}
+
+export async function reenviarConfirmacion(citaId: string, email?: string): Promise<CitaResponse & { emailEnviado: string }> {
+  const { data } = await api.post<CitaResponse & { emailEnviado: string }>(`/appointments/reenviar/${citaId}`, { email });
+  return data;
+}
